@@ -1,5 +1,7 @@
 # ghidra-decompiler-standalone
 
+I've edited the printc.cc file to emit pcode like instructions for debugging, I will be moving towards making a printllvm class instead
+
 ### Steps
 
 1. git clone https://github.com/toor-de-force/ghidra-decompiler-standalone.git
