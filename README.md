@@ -7,8 +7,7 @@
 3. make decomp_dbg *might need dependencies
 4. export SLEIGHHOME=<wherever ghidra's root is on your system>
 5. ./decomp_dbg
-6. restore <absolute path to desired xml file produced by ghidra gui>
-  (xml file made by : decompiler window->black triangle->debug decompiler function)
+6. restore <absolute path to xml file produced by ghidra>
 7. load function main
 8. decompile
 9. print C flat
