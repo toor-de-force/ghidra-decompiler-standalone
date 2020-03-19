@@ -1,0 +1,259 @@
+<xml_savefile name="main" target="default" adjustvma="0">
+<binaryimage arch="x86:LE:64:default:gcc">
+<bytechunk space="ram" offset="0x100039" readonly="true">
+                  554889e54883ec
+10e8baffffffe8c50f00008945fc8b45
+fc8945f8837dfc007e2f837dfc097e29
+837dfc317e23837dfc4a7e1d837dfc64
+7e05e89cffffff8b45f883f81e0f94c0
+84c07405e89dffffffb800000000c9c3
+</bytechunk>
+</binaryimage>
+<coretypes>
+<void/>
+<type name="uint" size="4" metatype="uint" id="-9223371465083307041"/>
+<type name="code" size="1" metatype="code" id="-9223371462259126427"/>
+<type name="int" size="4" metatype="int" id="-9223370945157383201"/>
+<type name="uint3" size="3" metatype="uint" id="-9223225663358771405"/>
+<type name="uint5" size="5" metatype="uint" id="-9223225663358771403"/>
+<type name="uint7" size="7" metatype="uint" id="-9223225663358771401"/>
+<type name="uint6" size="6" metatype="uint" id="-9223225661105102435"/>
+<type name="int3" size="3" metatype="int" id="-9223092562322268365"/>
+<type name="int5" size="5" metatype="int" id="-9223092562322268363"/>
+<type name="int7" size="7" metatype="int" id="-9223092562322268361"/>
+<type name="int6" size="6" metatype="int" id="-9223092560068599395"/>
+<type name="char" size="1" metatype="int" char="true" id="-9223091865880322087"/>
+<type name="uint16" size="16" metatype="uint" id="-9185900419569365091"/>
+<type name="ushort" size="2" metatype="uint" id="-9185691276929259553"/>
+<type name="int16" size="16" metatype="int" id="-9151826554224586851"/>
+<type name="byte" size="1" metatype="uint" id="-9151688846347870363"/>
+<type name="long" size="8" metatype="int" id="-9151688846179449497"/>
+<type name="bool" size="1" metatype="bool" id="-9151688804115639865"/>
+<type name="sbyte" size="1" metatype="int" id="-9151648198777381019"/>
+<type name="short" size="2" metatype="int" id="-9151648197910059041"/>
+<type name="ulong" size="8" metatype="uint" id="-9151648190019025561"/>
+<type name="wchar_t" size="4" metatype="int" utf="true" id="-8801050271826140705"/>
+<type name="wchar16" size="2" metatype="int" utf="true" id="-8801050271826128995"/>
+<type name="double" size="8" metatype="float" id="-6087405195602966429"/>
+<type name="float10" size="10" metatype="float" id="-5894303970639204475"/>
+<type name="undefined" size="1" metatype="unknown" id="-4223139060020122321"/>
+<type name="float2" size="2" metatype="float" id="-3085472373819564389"/>
+<type name="undefined2" size="2" metatype="unknown" id="-1989071053142544393"/>
+<type name="undefined4" size="4" metatype="unknown" id="-1989071053142544391"/>
+<type name="undefined6" size="6" metatype="unknown" id="-1989071053142544389"/>
+<type name="undefined8" size="8" metatype="unknown" id="-1989071053142544387"/>
+<type name="undefined5" size="5" metatype="unknown" id="-1989071052499136175"/>
+<type name="undefined3" size="3" metatype="unknown" id="-1989071052499136173"/>
+<type name="undefined7" size="7" metatype="unknown" id="-1989071052499136169"/>
+<type name="undefined1" size="1" metatype="unknown" id="-1989071052499136163"/>
+<type name="longdouble" size="16" metatype="float" id="-1267909053971395201"/>
+<type name="float" size="4" metatype="float" id="-120139017508053025"/>
+</coretypes>
+<save_state>
+<typegrp intsize="4" structalign="4" enumsize="4" enumsigned="false">
+<type name="undefined" metatype="unknown" size="1"></type>
+</typegrp>
+<db>
+<scope name="">
+<parent>
+</parent>
+<symbollist>
+<mapsym>
+<function id="0xb" name="main" size="1">
+<addr space="ram" offset="0x100039"/><localdb lock="false" main="stack">
+<scope name="main">
+<parent>
+<val/>
+</parent>
+<rangelist/>
+<symbollist>
+<mapsym>
+<symbol id="0x1e" name="local_10" typelock="false" namelock="true" readonly="false" cat="-1">
+<typeref name="undefined4"/></symbol>
+<addr space="stack" offset="0xfffffffffffffff0" size="4"/><rangelist/></mapsym>
+<mapsym>
+<symbol id="0x1f" name="local_c" typelock="false" namelock="true" readonly="false" cat="-1">
+<typeref name="undefined4"/></symbol>
+<addr space="stack" offset="0xfffffffffffffff4" size="4"/><rangelist/></mapsym>
+</symbollist>
+</scope>
+</localdb>
+<prototype extrapop="8" model="unknown">
+  <returnsym>
+   <addr space="register" offset="0x0" size="1"/>
+   <typeref name="undefined"/>  </returnsym>
+</prototype>
+</function>
+<addr space="ram" offset="0x100039" size="1"/><rangelist/></mapsym>
+<mapsym>
+<function id="0x3" name="path_start" size="1">
+<addr space="ram" offset="0x100000"/><localdb lock="false" main="stack">
+<scope name="path_start">
+<parent>
+<val/>
+</parent>
+<rangelist/>
+<symbollist>
+</symbollist>
+</scope>
+</localdb>
+<prototype extrapop="8" model="unknown" voidlock="true">
+  <returnsym>
+   <addr space="register" offset="0x0" size="1"/>
+   <typeref name="undefined"/>  </returnsym>
+</prototype>
+</function>
+<addr space="ram" offset="0x100000" size="1"/><rangelist/></mapsym>
+<mapsym>
+<function id="0x16" name="rand" size="1">
+<addr space="ram" offset="0x101010"/><localdb lock="false" main="stack">
+<scope name="rand">
+<parent>
+<val/>
+</parent>
+<rangelist/>
+<symbollist>
+</symbollist>
+</scope>
+</localdb>
+<prototype extrapop="8" model="unknown" voidlock="true">
+  <returnsym typelock="true">
+   <addr space="register" offset="0x0" size="4"/>
+   <type name="int" metatype="int" size="4"></type>  </returnsym>
+</prototype>
+</function>
+<addr space="ram" offset="0x101010" size="1"/><rangelist/></mapsym>
+<mapsym>
+<function id="0x7" name="path_goal" size="1">
+<addr space="ram" offset="0x100013"/><localdb lock="false" main="stack">
+<scope name="path_goal">
+<parent>
+<val/>
+</parent>
+<rangelist/>
+<symbollist>
+</symbollist>
+</scope>
+</localdb>
+<prototype extrapop="8" model="unknown" voidlock="true">
+  <returnsym>
+   <addr space="register" offset="0x0" size="1"/>
+   <typeref name="undefined"/>  </returnsym>
+</prototype>
+</function>
+<addr space="ram" offset="0x100013" size="1"/><rangelist/></mapsym>
+<mapsym>
+<function id="0x9" name="path_nongoal" size="1">
+<addr space="ram" offset="0x100026"/><localdb lock="false" main="stack">
+<scope name="path_nongoal">
+<parent>
+<val/>
+</parent>
+<rangelist/>
+<symbollist>
+</symbollist>
+</scope>
+</localdb>
+<prototype extrapop="8" model="unknown" voidlock="true">
+  <returnsym>
+   <addr space="register" offset="0x0" size="1"/>
+   <typeref name="undefined"/>  </returnsym>
+</prototype>
+</function>
+<addr space="ram" offset="0x100026" size="1"/><rangelist/></mapsym>
+</symbollist>
+</scope>
+</db>
+<context_points>
+<context_pointset space="ram" offset="0x100039">
+  <set name="addrsize" val="2"/>
+  <set name="bit64" val="1"/>
+  <set name="opsize" val="1"/>
+  <set name="segover" val="0"/>
+  <set name="highseg" val="0"/>
+  <set name="protectedMode" val="0"/>
+  <set name="repneprefx" val="0"/>
+  <set name="prefix_f2" val="0"/>
+  <set name="mandover" val="0"/>
+  <set name="repprefx" val="0"/>
+  <set name="prefix_f3" val="0"/>
+  <set name="opprefx" val="0"/>
+  <set name="prefix_66" val="0"/>
+  <set name="rexWprefix" val="0"/>
+  <set name="rexRprefix" val="0"/>
+  <set name="rexXprefix" val="0"/>
+  <set name="rexBprefix" val="0"/>
+  <set name="rexprefix" val="0"/>
+  <set name="vexMode" val="0"/>
+  <set name="vexL" val="0"/>
+  <set name="suffix3D" val="0"/>
+  <set name="vexVVVV" val="0"/>
+  <set name="vexMMMMM" val="0"/>
+  <set name="instrPhase" val="0"/>
+</context_pointset>
+<tracked_pointset space="ram" offset="0x100039">
+<set space="register" offset="0x20a" size="1" val="0x0"/>
+</tracked_pointset>
+</context_points>
+<commentdb>
+</commentdb>
+<optionslist>
+ <currentaction>
+  <param1>conditionalexe</param1>
+  <param2>on</param2>
+</currentaction>
+ <readonly>on</readonly>
+ <currentaction>
+  <param1>decompile</param1>
+  <param2>unreachable</param2>
+  <param3>on</param3>
+</currentaction>
+ <currentaction>
+  <param1>decompile</param1>
+  <param2>doubleprecis</param2>
+  <param3>on</param3>
+</currentaction>
+ <ignoreunimplemented>off</ignoreunimplemented>
+ <inferconstptr>on</inferconstptr>
+ <nullprinting>off</nullprinting>
+ <inplaceops>off</inplaceops>
+ <conventionprinting>on</conventionprinting>
+ <nocastprinting>off</nocastprinting>
+ <maxlinewidth>100</maxlinewidth>
+ <indentincrement>2</indentincrement>
+ <commentindent>20</commentindent>
+ <commentstyle>c</commentstyle>
+ <commentinstruction>
+  <param1>header</param1>
+  <param2>off</param2>
+</commentinstruction>
+ <commentinstruction>
+  <param1>user2</param1>
+  <param2>on</param2>
+</commentinstruction>
+ <commentinstruction>
+  <param1>user1</param1>
+  <param2>off</param2>
+</commentinstruction>
+ <commentinstruction>
+  <param1>user3</param1>
+  <param2>off</param2>
+</commentinstruction>
+ <commentinstruction>
+  <param1>warning</param1>
+  <param2>on</param2>
+</commentinstruction>
+ <commentheader>
+  <param1>header</param1>
+  <param2>on</param2>
+</commentheader>
+ <commentheader>
+  <param1>warningheader</param1>
+  <param2>on</param2>
+</commentheader>
+ <integerformat>best</integerformat>
+ <setlanguage>c-language</setlanguage>
+ <protoeval>__stdcall</protoeval>
+</optionslist>
+</save_state>
+</xml_savefile>
