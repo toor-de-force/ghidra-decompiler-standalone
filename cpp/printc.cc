@@ -16,16 +16,6 @@
 #include "printc.hh"
 #include "funcdata.hh"
 
-// Operator tokens for expressions added by Tej for LLVM
-OpToken PrintC::copy = { "COPY", 1, 14, false, OpToken::unary_prefix, 1, 5, (OpToken *)0 };
-OpToken PrintC::branch = { "BRANCH" , 1, 14, false, OpToken::unary_prefix, 1, 5, (OpToken *)0};
-OpToken PrintC::cbranch = { "CBRANCH", 1, 14, false, OpToken::unary_prefix, 1, 5, (OpToken *)0};
-OpToken PrintC::branchind = { "BRANCHIND", 1, 14, false, OpToken::unary_prefix, 1, 5, (OpToken *)0};
-OpToken PrintC::call = { "CALL", 1, 14, false, OpToken::unary_prefix, 1, 5, (OpToken *)0};
-OpToken PrintC::callind = { "CALLIND", 1, 14, false, OpToken::unary_prefix, 1, 5, (OpToken *)0};
-OpToken PrintC::callother = { "CALLOTHER", 1, 14, false, OpToken::unary_prefix, 1, 5, (OpToken *)0};
-OpToken PrintC::ret = { "RETURN", 1, 14, false, OpToken::unary_prefix, 1, 5, (OpToken *)0};
-
 // Operator tokens for expressions
 //                        token #in prec assoc   optype       space bump
 OpToken PrintC::hidden = { "", 1, 70, false, OpToken::hiddenfunction, 0, 0, (OpToken *)0 };
@@ -61,7 +51,7 @@ OpToken PrintC::boolean_and = { "&&", 2, 22, false, OpToken::binary, 1, 0, (OpTo
 OpToken PrintC::boolean_xor = { "^^", 2, 20, false, OpToken::binary, 1, 0, (OpToken *)0 };
 OpToken PrintC::boolean_or = { "||", 2, 18, false, OpToken::binary, 1, 0, (OpToken *)0 };
 OpToken PrintC::assignment = { "=", 2, 14, false, OpToken::binary, 1, 5, (OpToken *)0 };
-OpToken PrintC::comma = { ",", 2, 2, true, OpToken::binary, 0, 0, (OpToken *)0 };
+OpToken PrintC::comma = { ", ", 2, 2, true, OpToken::binary, 0, 0, (OpToken *)0 };
 OpToken PrintC::new_op = { "", 2, 62, false, OpToken::space, 1, 0, (OpToken *)0 };
 
 // Inplace assignment operators
@@ -110,6 +100,10 @@ PrintC::PrintC(Architecture *g,const string &nm) : PrintLanguage(g,nm)
     option_nocasts = false;
     option_unplaced = false;
     option_hide_exts = true;
+    option_space_after_comma = false;
+    option_newline_before_else = true;
+    option_newline_before_opening_brace = false;
+    option_newline_after_prototype = true;
     nullToken = "NULL";
 
     // Set the flip tokens
@@ -306,8 +300,9 @@ void PrintC::opFunc(const PcodeOp *op)
     string nm = op->getOpcode()->getOperatorName(op);
     pushAtom(Atom(nm,optoken,EmitXml::no_color,op));
     if (op->numInput() > 0) {
-        for(int4 i=0;i<op->numInput()-1;++i)
+        for(int4 i=0;i<op->numInput()-1;++i) {
             pushOp(&comma,op);
+        }
         // implied vn's pushed on in reverse order for efficiency
         // see PrintLanguage::pushVnImplied
         for(int4 i=op->numInput()-1;i>=0;--i)
@@ -346,6 +341,12 @@ void PrintC::opHiddenFunc(const PcodeOp *op)
     pushVnImplied(op->getIn(0),op,mods);
 }
 
+void PrintC::opCopy(const PcodeOp *op)
+
+{
+    pushVnImplied(op->getIn(0),op,mods);
+}
+
 void PrintC::opLoad(const PcodeOp *op)
 
 {
@@ -362,13 +363,13 @@ void PrintC::opLoad(const PcodeOp *op)
 void PrintC::opStore(const PcodeOp *op)
 
 {
-    bool usearray;
 
+    bool usearray;
     // We assume the STORE is a statement
     uint4 m = mods;
     pushOp(&assignment,op);	// This is an assignment
     usearray = checkArrayDeref(op->getIn(1));
-    if (usearray && (!isSet(force_pointer)))
+    if (false && usearray && (!isSet(force_pointer)))
         m |= print_store_value;
     else {
         pushOp(&dereference,op);
@@ -379,6 +380,152 @@ void PrintC::opStore(const PcodeOp *op)
     pushVnImplied(op->getIn(1),op,m);
 }
 
+void PrintC::opBranch(const PcodeOp *op)
+
+{
+    if (isSet(flat)) {
+        // Assume the BRANCH is a statement
+        emit->tagOp("goto",EmitXml::keyword_color,op);
+        emit->spaces(1);
+        pushVnImplied(op->getIn(0),op,mods);
+    }
+}
+
+/// Print the branching condition:
+///   - If it is the first condition, print \b if
+///   - If there is no block structure, print \b goto
+///
+/// \param op is the CBRANCH PcodeOp
+void PrintC::opCbranch(const PcodeOp *op)
+
+{
+    // FIXME:  This routine shouldn't emit directly
+    bool yesif = isSet(flat);
+    bool yesparen = !isSet(comma_separate);
+    bool booleanflip = op->isBooleanFlip();
+    uint4 m = mods;
+
+    if (yesif) {			// If not printing block structure
+        emit->tagOp("if",EmitXml::keyword_color,op);
+        emit->spaces(1);
+        if (op->isFallthruTrue()) {	// and the fallthru is the true branch
+            booleanflip = !booleanflip; // print negation of condition
+            m |= falsebranch;	  // and print the false (non-fallthru) branch
+        }
+    }
+    int4 id;
+    if (yesparen)
+        id = emit->openParen('(');
+    else
+        id = emit->openGroup();
+    if (booleanflip) {
+        if (checkPrintNegation(op->getIn(1))) {
+            m |= PrintLanguage::negatetoken;
+            booleanflip = false;
+        }
+    }
+    if (booleanflip)
+        pushOp(&boolean_not,op);
+    pushVnImplied(op->getIn(1),op,m);
+    // Make sure stack is clear before emitting more
+    recurse();
+    if (yesparen)
+        emit->closeParen(')',id);
+    else
+        emit->closeGroup(id);
+
+    if (yesif) {
+        emit->spaces(1);
+        emit->print("goto",EmitXml::keyword_color);
+        emit->spaces(1);
+        pushVnImplied(op->getIn(0),op,mods);
+    }
+}
+
+void PrintC::opBranchind(const PcodeOp *op)
+
+{
+    // FIXME:  This routine shouldn't emit directly
+    emit->tagOp("switch",EmitXml::keyword_color,op);	// Print header for switch
+    int4 id = emit->openParen('(');
+    pushVnImplied(op->getIn(0),op,mods);
+    recurse();
+    emit->closeParen(')',id);
+}
+
+void PrintC::opCall(const PcodeOp *op)
+
+{
+    pushOp(&function_call,op);
+    const Varnode *callpoint = op->getIn(0);
+    if (callpoint->getSpace()->getType()==IPTR_FSPEC) {
+        FuncCallSpecs *fc = FuncCallSpecs::getFspecFromConst(callpoint->getAddr());
+        if (fc->getName().size()==0) {
+            string name = genericFunctionName(fc->getEntryAddress());
+            pushAtom(Atom(name,functoken,EmitXml::funcname_color,op,(const Funcdata *)0));
+        }
+        else
+            pushAtom(Atom(fc->getName(),functoken,EmitXml::funcname_color,op,(const Funcdata *)0));
+    }
+    else {
+        clear();
+        throw LowlevelError("Missing function callspec");
+    }
+    int4 startparam = isSet(hide_thisparam) && op->hasThisPointer() ? 2 : 1;
+    if (op->numInput() > startparam) {
+        for(int4 i=startparam;i<op->numInput()-1;++i)
+            pushOp(&comma,op);
+        // implied vn's pushed on in reverse order for efficiency
+        // see PrintLanguage::pushVnImplied
+        for(int4 i=op->numInput()-1;i>=startparam;--i)
+            pushVnImplied(op->getIn(i),op,mods);
+    }
+    else				// Push empty token for void
+        pushAtom(Atom("",blanktoken,EmitXml::no_color));
+}
+
+void PrintC::opCallind(const PcodeOp *op)
+
+{
+    pushOp(&function_call,op);
+    pushOp(&dereference,op);
+    // implied vn's pushed on in reverse order for efficiency
+    // see PrintLanguage::pushVnImplied
+    int4 startparam = isSet(hide_thisparam) && op->hasThisPointer() ? 2 : 1;
+    if (op->numInput()>startparam + 1) {	// Multiple parameters
+        pushVnImplied(op->getIn(0),op,mods);
+        for(int4 i=startparam;i<op->numInput()-1;++i)
+            pushOp(&comma,op);
+        for(int4 i=op->numInput()-1;i>=startparam;--i)
+            pushVnImplied(op->getIn(i),op,mods);
+    }
+    else if (op->numInput()==startparam + 1) {	// One parameter
+        pushVnImplied(op->getIn(startparam),op,mods);
+        pushVnImplied(op->getIn(0),op,mods);
+    }
+    else {			// A void function
+        pushVnImplied(op->getIn(0),op,mods);
+        pushAtom(Atom("",blanktoken,EmitXml::no_color));
+    }
+}
+
+void PrintC::opCallother(const PcodeOp *op)
+
+{
+    string nm = op->getOpcode()->getOperatorName(op);
+    pushOp(&function_call,op);
+    pushAtom(Atom(nm,optoken,EmitXml::funcname_color,op));
+    if (op->numInput() > 1) {
+        for(int4 i=1;i<op->numInput()-1;++i)
+            pushOp(&comma,op);
+        // implied vn's pushed on in reverse order for efficiency
+        // see PrintLanguage::pushVnImplied
+        for(int4 i=op->numInput()-1;i>=1;--i)
+            pushVnImplied(op->getIn(i),op,mods);
+    }
+    else				// Push empty token for void
+        pushAtom(Atom("",blanktoken,EmitXml::no_color));
+}
 
 void PrintC::opConstructor(const PcodeOp *op,bool withNew)
 
@@ -417,6 +564,37 @@ void PrintC::opConstructor(const PcodeOp *op,bool withNew)
     }
 }
 
+void PrintC::opReturn(const PcodeOp *op)
+
+{
+    string nm;
+    switch(op->getHaltType()) {
+        default:			// The most common case, plain return
+            // FIXME:  This routine shouldn't emit directly
+            emit->tagOp("return",EmitXml::keyword_color,op);
+            if (op->numInput()>1) {
+                emit->spaces(1);
+                pushVnImplied(op->getIn(1),op,mods);
+            }
+            return;
+        case PcodeOp::noreturn:	// Previous instruction does not exit
+        case PcodeOp::halt:		// Process halts
+            nm = "halt";
+            break;
+        case PcodeOp::badinstruction:
+            nm = "halt_baddata";	// CPU executes bad instruction
+            break;
+        case PcodeOp::unimplemented:	// instruction is unimplemented
+            nm = "halt_unimplemented";
+            break;
+        case PcodeOp::missing:	// Did not analyze this instruction
+            nm = "halt_missing";
+            break;
+    }
+    pushOp(&function_call,op);
+    pushAtom(Atom(nm,optoken,EmitXml::funcname_color,op));
+    pushAtom(Atom("",blanktoken,EmitXml::no_color));
+}
 
 void PrintC::opIntZext(const PcodeOp *op,const PcodeOp *readOp)
 
@@ -1572,6 +1750,9 @@ void PrintC::emitStructDefinition(const TypeStruct *ct)
         iter++;
         if (iter != ct->endField()) {
             emit->print(","); // Print comma separator
+            if (option_space_after_comma) {
+                emit->spaces(1);
+            }
             emit->tagLine();
         }
     }
@@ -1668,8 +1849,12 @@ void PrintC::emitPrototypeInputs(const FuncProto *proto)
         emit->print("void",EmitXml::keyword_color);
     else {
         for(int4 i=0;i<sz;++i) {
-            if (i!=0)
+            if (i!=0) {
                 emit->print(",");
+                if (option_space_after_comma) {
+                    emit->spaces(1);
+                }
+            }
             ProtoParameter *param = proto->getParam(i);
             Symbol *sym = param->getSymbol();
             if (sym != (Symbol *)0)
@@ -1684,8 +1869,12 @@ void PrintC::emitPrototypeInputs(const FuncProto *proto)
         }
     }
     if (proto->isDotdotdot()) {
-        if (sz != 0)
+        if (sz != 0) {
             emit->print(",");
+            if (option_space_after_comma) {
+                emit->spaces(1);
+            }
+        }
         emit->print("...");
     }
 }
@@ -1724,6 +1913,8 @@ void PrintC::emitStatement(const PcodeOp *inst)
     int4 id = emit->beginStatement(inst);
     emitExpression(inst);
     emit->endStatement(id);
+    if (!isSet(comma_separate))
+        emit->print(";");
 }
 
 /// \brief Emit a statement representing an unstructured branch
@@ -1902,6 +2093,7 @@ bool PrintC::emitInplaceOp(const PcodeOp *op)
 void PrintC::emitExpression(const PcodeOp *op)
 
 {
+    //emit->print(op->getOpName().data());
     const Varnode *outvn = op->getOut();
     if (outvn != (Varnode *)0) {
         if (option_inplace_ops && emitInplaceOp(op)) return;
@@ -2077,6 +2269,7 @@ void PrintC::docFunction(const Funcdata *fd)
 {
     uint4 modsave = mods;
     setFlat(true);
+    unsetMod(force_pointer);
     if (!fd->isProcStarted())
         throw RecovError("Function not decompiled");
     if ((!isSet(flat))&&(fd->hasNoStructBlocks()))
@@ -2296,7 +2489,11 @@ void PrintC::emitBlockIf(const BlockIf *bl)
     }
 
     setMod(no_branch);
-    emit->spaces(1);
+    if (!option_newline_before_opening_brace) {
+        emit->spaces(1);
+    } else {
+        emit->tagLine();
+    }
     int4 id = emit->startIndent();
     emit->print("{");
     int4 id1 = emit->beginBlock(bl->getBlock(1));
@@ -2306,9 +2503,17 @@ void PrintC::emitBlockIf(const BlockIf *bl)
     emit->tagLine();
     emit->print("}");
     if (bl->getSize()==3) {
-        emit->tagLine();
+        if (option_newline_before_else) {
+            emit->tagLine();
+        } else {
+            emit->spaces(1);
+        }
         emit->print("else",EmitXml::keyword_color);
-        emit->spaces(1);
+        if (option_newline_before_opening_brace) {
+            emit->tagLine();
+        } else {
+            emit->spaces(1);
+        }
         int4 id = emit->startIndent();
         emit->print("{");
         int4 id2 = emit->beginBlock(bl->getBlock(2));
@@ -2396,7 +2601,11 @@ void PrintC::emitBlockDoWhile(const BlockDoWhile *bl)
     emitAnyLabelStatement(bl);
     emit->tagLine();
     emit->print("do",EmitXml::keyword_color);
-    emit->spaces(1);
+    if (option_newline_before_opening_brace) {
+        emit->tagLine();
+    } else {
+        emit->spaces(1);
+    }
     int4 id = emit->startIndent();
     emit->print("{");
     pushMod();
@@ -2428,7 +2637,11 @@ void PrintC::emitBlockInfLoop(const BlockInfLoop *bl)
     emitAnyLabelStatement(bl);
     emit->tagLine();
     emit->print("do",EmitXml::keyword_color);
-    emit->spaces(1);
+    if (option_newline_before_opening_brace) {
+        emit->tagLine();
+    } else {
+        emit->spaces(1);
+    }
     int4 id = emit->startIndent();
     emit->print("{");
     int4 id1 = emit->beginBlock(bl->getBlock(0));
